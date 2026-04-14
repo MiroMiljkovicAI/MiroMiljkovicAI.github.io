@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Miro Miljković — AI Projects</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Barlow+Condensed:wght@300;400;500;600;700&family=Barlow:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --gold: #C9A84C;
+    --gold-light: #E2C47A;
+    --gold-dim: rgba(201,168,76,0.15);
+    --black: #0A0A0A;
+    --dark: #111111;
+    --dark2: #181818;
+    --dark3: #222222;
+    --white: #F5F0E8;
+    --grey: #888880;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--black);
+    color: var(--white);
+    font-family: 'Barlow', sans-serif;
+    font-weight: 300;
+    overflow-x: hidden;
+  }
+
+  /* NOISE TEXTURE */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.035'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.4;
+  }
+
+  /* HERO */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 80px 60px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero::after {
+    content: '';
+    position: absolute;
+    top: -200px;
+    right: -200px;
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, rgba(201,168,76,0.08) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .hero-tag {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 32px;
+    opacity: 0;
+    animation: fadeUp 0.8s ease forwards 0.2s;
+  }
+
+  .hero-name {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(64px, 10vw, 140px);
+    font-weight: 300;
+    line-height: 0.9;
+    letter-spacing: -2px;
+    margin-bottom: 40px;
+    opacity: 0;
+    animation: fadeUp 0.8s ease forwards 0.4s;
+  }
+
+  .hero-name em {
+    font-style: italic;
+    color: var(--gold);
+  }
+
+  .hero-desc {
+    max-width: 520px;
+    font-size: 16px;
+    line-height: 1.7;
+    color: rgba(245,240,232,0.6);
+    margin-bottom: 60px;
+    opacity: 0;
+    animation: fadeUp 0.8s ease forwards 0.6s;
+  }
+
+  .hero-meta {
+    display: flex;
+    gap: 40px;
+    flex-wrap: wrap;
+    opacity: 0;
+    animation: fadeUp 0.8s ease forwards 0.8s;
+  }
+
+  .hero-meta-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .hero-meta-label {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 10px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--gold);
+  }
+
+  .hero-meta-value {
+    font-size: 14px;
+    color: rgba(245,240,232,0.7);
+  }
+
+  .scroll-hint {
+    position: absolute;
+    bottom: 40px;
+    left: 60px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--grey);
+    opacity: 0;
+    animation: fadeUp 0.8s ease forwards 1.2s;
+  }
+
+  .scroll-line {
+    width: 40px;
+    height: 1px;
+    background: var(--gold);
+    transform-origin: left;
+    animation: expandLine 1s ease forwards 1.5s;
+    transform: scaleX(0);
+  }
+
+  /* DIVIDER */
+  .divider {
+    width: 100%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    opacity: 0.3;
+    margin: 0 60px;
+    width: calc(100% - 120px);
+  }
+
+  /* SECTION */
+  section {
+    padding: 100px 60px;
+    position: relative;
+  }
+
+  .section-header {
+    display: flex;
+    align-items: baseline;
+    gap: 20px;
+    margin-bottom: 60px;
+  }
+
+  .section-number {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 13px;
+    color: var(--gold);
+    font-style: italic;
+  }
+
+  .section-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(36px, 5vw, 56px);
+    font-weight: 300;
+    letter-spacing: -1px;
+  }
+
+  .section-line {
+    flex: 1;
+    height: 1px;
+    background: rgba(201,168,76,0.2);
+    margin-left: 20px;
+  }
+
+  /* PROJECTS GRID */
+  .projects-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 2px;
+  }
+
+  .project-card {
+    background: var(--dark2);
+    padding: 40px;
+    position: relative;
+    overflow: hidden;
+    cursor: default;
+    transition: background 0.3s ease;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.6s ease, transform 0.6s ease, background 0.3s ease;
+  }
+
+  .project-card.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .project-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: var(--gold);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.4s ease;
+  }
+
+  .project-card:hover {
+    background: var(--dark3);
+  }
+
+  .project-card:hover::before {
+    transform: scaleX(1);
+  }
+
+  .project-card-accent {
+    position: absolute;
+    bottom: -40px;
+    right: -40px;
+    width: 120px;
+    height: 120px;
+    border: 1px solid rgba(201,168,76,0.08);
+    border-radius: 50%;
+    transition: transform 0.4s ease, opacity 0.4s ease;
+    opacity: 0;
+  }
+
+  .project-card:hover .project-card-accent {
+    opacity: 1;
+    transform: scale(1.2);
+  }
+
+  .project-tag {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 10px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .project-tag::before {
+    content: '';
+    width: 16px;
+    height: 1px;
+    background: var(--gold);
+  }
+
+  .project-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 28px;
+    font-weight: 400;
+    line-height: 1.1;
+    margin-bottom: 16px;
+    letter-spacing: -0.5px;
+  }
+
+  .project-desc {
+    font-size: 14px;
+    line-height: 1.65;
+    color: rgba(245,240,232,0.55);
+    margin-bottom: 28px;
+  }
+
+  .project-tech {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 28px;
+  }
+
+  .tech-pill {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border: 1px solid rgba(201,168,76,0.25);
+    color: rgba(201,168,76,0.7);
+  }
+
+  .project-link {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 12px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--gold);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: gap 0.2s ease;
+  }
+
+  .project-link:hover {
+    gap: 14px;
+  }
+
+  .project-link .arrow {
+    font-size: 16px;
+    transition: transform 0.2s ease;
+  }
+
+  .project-link:hover .arrow {
+    transform: translateX(4px);
+  }
+
+  /* ABOUT */
+  .about-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
+    align-items: start;
+  }
+
+  .about-text {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(20px, 2.5vw, 26px);
+    font-weight: 300;
+    line-height: 1.5;
+    color: rgba(245,240,232,0.85);
+  }
+
+  .about-text em {
+    font-style: italic;
+    color: var(--gold);
+  }
+
+  .about-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1px;
+    background: rgba(201,168,76,0.1);
+  }
+
+  .stat-box {
+    background: var(--dark2);
+    padding: 32px;
+  }
+
+  .stat-number {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 52px;
+    font-weight: 300;
+    color: var(--gold);
+    line-height: 1;
+    margin-bottom: 8px;
+  }
+
+  .stat-label {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--grey);
+  }
+
+  /* FOOTER */
+  footer {
+    padding: 60px;
+    border-top: 1px solid rgba(201,168,76,0.15);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: gap;
+    gap: 20px;
+  }
+
+  .footer-name {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 20px;
+    font-style: italic;
+    color: var(--gold);
+  }
+
+  .footer-note {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--grey);
+  }
+
+  /* ANIMATIONS */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes expandLine {
+    to { transform: scaleX(1); }
+  }
+
+  /* MOBILE */
+  @media (max-width: 768px) {
+    .hero, section, footer { padding: 60px 24px; }
+    .hero { padding-top: 100px; }
+    .scroll-hint { left: 24px; }
+    .divider { margin: 0 24px; width: calc(100% - 48px); }
+    .about-grid { grid-template-columns: 1fr; gap: 40px; }
+    .projects-grid { grid-template-columns: 1fr; }
+    footer { flex-direction: column; align-items: flex-start; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-tag">Portfolio — AI Projects</div>
+  <h1 class="hero-name">Miro<br><em>Miljković</em></h1>
+  <p class="hero-desc">Senior Sales Manager, media strategist i konzultant koji koristi AI alate za izgradnju digitalnih proizvoda. Svaki projekt ovdje nastao je u suradnji s Claude AI.</p>
+  <div class="hero-meta">
+    <div class="hero-meta-item">
+      <span class="hero-meta-label">Lokacija</span>
+      <span class="hero-meta-value">Zagreb, Hrvatska</span>
+    </div>
+    <div class="hero-meta-item">
+      <span class="hero-meta-label">Fokus</span>
+      <span class="hero-meta-value">CTV & Omnichannel Advertising</span>
+    </div>
+    <div class="hero-meta-item">
+      <span class="hero-meta-label">Iskustvo</span>
+      <span class="hero-meta-value">15+ godina u medijima</span>
+    </div>
+  </div>
+  <div class="scroll-hint">
+    <span class="scroll-line"></span>
+    Projekti
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- PROJECTS -->
+<section id="projekti">
+  <div class="section-header">
+    <span class="section-number">01</span>
+    <h2 class="section-title">Projekti</h2>
+    <div class="section-line"></div>
+  </div>
+
+  <div class="projects-grid">
+
+    <div class="project-card">
+      <div class="project-tag">SaaS Platforma</div>
+      <h3 class="project-title">ResetUM</h3>
+      <p class="project-desc">Platforma za prodaju PDF vodiča za san i produktivnost. Stripe naplata, Google Analytics, Meta Pixel, Wise integracija za isplate.</p>
+      <div class="project-tech">
+        <span class="tech-pill">HTML/CSS</span>
+        <span class="tech-pill">Stripe</span>
+        <span class="tech-pill">GA4</span>
+        <span class="tech-pill">Meta Pixel</span>
+      </div>
+      <a href="https://resetum.com" target="_blank" class="project-link">Posjeti <span class="arrow">→</span></a>
+      <div class="project-card-accent"></div>
+    </div>
+
+    <div class="project-card">
+      <div class="project-tag">Web Platforma</div>
+      <h3 class="project-title">LUMINA</h3>
+      <p class="project-desc">Personalizirana platforma za životno vodstvo s 8 kategorija i canvas animacijama. Svaka stranica ima zasebni vizualni identitet.</p>
+      <div class="project-tech">
+        <span class="tech-pill">HTML/CSS</span>
+        <span class="tech-pill">Canvas API</span>
+        <span class="tech-pill">JavaScript</span>
+      </div>
+      <div class="project-card-accent"></div>
+    </div>
+
+    <div class="project-card">
+      <div class="project-tag">Poslovni Alat</div>
+      <h3 class="project-title">ProfitScan</h3>
+      <p class="project-desc">Dijagnostički alat za analizu poslovne profitabilnosti. Upitnik, analiza template i PDF izvještaj. Revolut integracija za naplatu.</p>
+      <div class="project-tech">
+        <span class="tech-pill">HTML/CSS</span>
+        <span class="tech-pill">Revolut</span>
+        <span class="tech-pill">Web3Forms</span>
+        <span class="tech-pill">PDF</span>
+      </div>
+      <div class="project-card-accent"></div>
+    </div>
+
+    <div class="project-card">
+      <div class="project-tag">CRM Tracker</div>
+      <h3 class="project-title">Sales CRM</h3>
+      <p class="project-desc">Standalone HTML CRM tracker s evidencijom sastanaka, action itemima, pipeline vizualizacijom i Report PDF za dijeljenje s kolegama.</p>
+      <div class="project-tech">
+        <span class="tech-pill">HTML/CSS</span>
+        <span class="tech-pill">JavaScript</span>
+        <span class="tech-pill">LocalStorage</span>
+        <span class="tech-pill">PDF Export</span>
+      </div>
+      <div class="project-card-accent"></div>
+    </div>
+
+    <div class="project-card">
+      <div class="project-tag">Ad Tech Alat</div>
+      <h3 class="project-title">AdTrack</h3>
+      <p class="project-desc">Standalone tracker za oglasne kampanje s XLS/CSV importom i Anthropic Vision API skeniranjem za automatsko čitanje podataka.</p>
+      <div class="project-tech">
+        <span class="tech-pill">HTML/CSS</span>
+        <span class="tech-pill">Anthropic API</span>
+        <span class="tech-pill">XLS Import</span>
+      </div>
+      <div class="project-card-accent"></div>
+    </div>
+
+    <div class="project-card">
+      <div class="project-tag">Brand Ekosustav</div>
+      <h3 class="project-title">AMMCC LLC</h3>
+      <p class="project-desc">Kompletan web ekosustav za US entitet. Landing, branding, Media Desk i Brand Identity product stranice. Crno-zlatni premium identitet.</p>
+      <div class="project-tech">
+        <span class="tech-pill">HTML/CSS</span>
+        <span class="tech-pill">Cormorant</span>
+        <span class="tech-pill">Barlow</span>
+      </div>
+      <div class="project-card-accent"></div>
+    </div>
+
+    <div class="project-card">
+      <div class="project-tag">Usporedna Platforma</div>
+      <h3 class="project-title">Online Osiguranje</h3>
+      <p class="project-desc">Platforma za usporedbu osiguranja. HANFA licencirana, cPanel hosting. U pripremi za API integraciju s osiguravateljem.</p>
+      <div class="project-tech">
+        <span class="tech-pill">HTML/CSS</span>
+        <span class="tech-pill">cPanel</span>
+        <span class="tech-pill">HANFA</span>
+      </div>
+      <a href="https://online-osiguranje.net" target="_blank" class="project-link">Posjeti <span class="arrow">→</span></a>
+      <div class="project-card-accent"></div>
+    </div>
+
+    <div class="project-card">
+      <div class="project-tag">Gaming Platform</div>
+      <h3 class="project-title">Max Gaming Studio</h3>
+      <p class="project-desc">Browser gaming platforma s Star Wars igrama uključujući Side Force 2D Canvas platformer i 3D runner varijantu.</p>
+      <div class="project-tech">
+        <span class="tech-pill">HTML5 Canvas</span>
+        <span class="tech-pill">JavaScript</span>
+        <span class="tech-pill">2D/3D</span>
+      </div>
+      <div class="project-card-accent"></div>
+    </div>
+
+    <div class="project-card">
+      <div class="project-tag">Poslovni Dashboard</div>
+      <h3 class="project-title">Poslovna Kocka Dashboard</h3>
+      <p class="project-desc">Mini dashboard za freelance konzultanta: ponude, naplativi sati i prihod pregled. LocalStorage perzistencija, zlatni dizajn.</p>
+      <div class="project-tech">
+        <span class="tech-pill">HTML/CSS</span>
+        <span class="tech-pill">JavaScript</span>
+        <span class="tech-pill">LocalStorage</span>
+      </div>
+      <div class="project-card-accent"></div>
+    </div>
+
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ABOUT -->
+<section id="o-meni">
+  <div class="section-header">
+    <span class="section-number">02</span>
+    <h2 class="section-title">O meni</h2>
+    <div class="section-line"></div>
+  </div>
+
+  <div class="about-grid">
+    <div>
+      <p class="about-text">15+ godina u medijima i oglašavanju. Senior Sales Manager za <em>CTV i omnichannel</em> tržišta. Paralelno gradim digitalne proizvode koristeći AI kao razvojni alat, bez poznavanja programiranja.</p>
+    </div>
+    <div class="about-stats">
+      <div class="stat-box">
+        <div class="stat-number">15+</div>
+        <div class="stat-label">Godina iskustva</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-number">9+</div>
+        <div class="stat-label">AI projekata</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-number">3</div>
+        <div class="stat-label">Aktivna poduzeća</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-number">HR</div>
+        <div class="stat-label">Zagreb, Hrvatska</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-name">Miro Miljković</div>
+  <div class="footer-note">Svi projekti izrađeni u suradnji s Claude AI &copy; 2026</div>
+</footer>
+
+<script>
+  // Scroll reveal for project cards
+  const cards = document.querySelectorAll('.project-card');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry, i) => {
+      if (entry.isIntersecting) {
+        setTimeout(() => {
+          entry.target.classList.add('visible');
+        }, (Array.from(cards).indexOf(entry.target) % 3) * 100);
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1 });
+
+  cards.forEach(card => observer.observe(card));
+</script>
+
+</body>
+</html>
